@@ -47,7 +47,6 @@
 
 - `.github/workflows/test-python.yaml` - linting, unit, and integration tests
 - `.github/workflows/test-e2e.yaml` - e2e tests
-- `.github/workflows/docs.yaml` - generating Kubeflow SDK docs
 
 ## Skip These (IMPORTANT)
 
