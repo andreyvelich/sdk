@@ -52,7 +52,7 @@
 
 Do not comment on:
 
-- **Style/formatting** - CI handles this (black, prettier)
+- **Style/formatting** - CI handles this (ruff, ty, uv)
 - **Test failures** - CI handles this (full test suite)
 - **Missing dependencies** - CI handles this
 

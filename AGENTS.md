@@ -46,10 +46,9 @@ kubeflow/                        # Main Python package
 │   │   │   ├── backend.py
 │   │   │   └── adapters/                # Docker & Podman adapter implementations
 │   │   └── localprocess/              # Subprocess backend for quick prototyping
-│   ├── types/                       # Common trainer types (e.g. TrainJob, CustomTrainer, BuiltinTrainer)
 │   ├── constants/                   # Common trainer constants and defaults
 │   ├── options/                     # Backend configuration options (KubernetesOptions, etc.)
-│   └── utils/                       # Common utils
+│   ├── types/                       # Common trainer types (e.g. TrainJob, CustomTrainer, BuiltinTrainer)
 |
 ├── optimizer/                   # Kubeflow Optimizer
 │   ├── api/                       # OptimizerClient - main user interface
