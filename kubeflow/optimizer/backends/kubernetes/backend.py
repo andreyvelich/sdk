@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from collections.abc import Callable, Iterator
+import copy
 import logging
 import multiprocessing
 import random
@@ -81,6 +82,9 @@ class KubernetesBackend(RuntimeBackend):
         # Validate search_space
         if not search_space:
             raise ValueError("Search space must be set.")
+
+        trial_template = copy.deepcopy(trial_template)
+        search_space = copy.deepcopy(search_space)
 
         # Set defaults.
         objectives = objectives or [Objective()]
