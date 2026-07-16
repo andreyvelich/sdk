@@ -1046,6 +1046,11 @@ def test_get_runtime_packages(kubernetes_backend, test_case):
     except Exception as e:
         assert type(e) is test_case.expected_error
 
+    if test_case.expected_status == SUCCESS:
+        kubernetes_backend.custom_api.delete_namespaced_custom_object.assert_called_once()
+    else:
+        kubernetes_backend.custom_api.delete_namespaced_custom_object.assert_not_called()
+
     print("test execution complete")
 
 
