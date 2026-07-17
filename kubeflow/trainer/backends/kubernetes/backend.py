@@ -117,12 +117,12 @@ class KubernetesBackend(RuntimeBackend):
                 namespace_thread.get(common_constants.DEFAULT_TIMEOUT)
             )
         except multiprocessing.TimeoutError as e:
-            raise TimeoutError(f"Timeout to list {constants.TRAINING_RUNTIME_KIND}s") from e
+            raise TimeoutError(f"Timeout to list {types.RuntimeKind.TRAINING_RUNTIME}s") from e
         except client.ApiException as e:
             if e.status != 404:
-                raise RuntimeError(f"Failed to list {constants.TRAINING_RUNTIME_KIND}s") from e
+                raise RuntimeError(f"Failed to list {types.RuntimeKind.TRAINING_RUNTIME}s") from e
         except Exception as e:
-            raise RuntimeError(f"Failed to list {constants.TRAINING_RUNTIME_KIND}s") from e
+            raise RuntimeError(f"Failed to list {types.RuntimeKind.TRAINING_RUNTIME}s") from e
 
         # Fetch cluster-scoped ClusterTrainingRuntimes.
         cluster_runtimes = None
@@ -131,9 +131,13 @@ class KubernetesBackend(RuntimeBackend):
                 cluster_thread.get(common_constants.DEFAULT_TIMEOUT)
             )
         except multiprocessing.TimeoutError as e:
-            raise TimeoutError(f"Timeout to list {constants.CLUSTER_TRAINING_RUNTIME_KIND}s") from e
+            raise TimeoutError(
+                f"Timeout to list {types.RuntimeKind.CLUSTER_TRAINING_RUNTIME}s"
+            ) from e
         except Exception as e:
-            raise RuntimeError(f"Failed to list {constants.CLUSTER_TRAINING_RUNTIME_KIND}s") from e
+            raise RuntimeError(
+                f"Failed to list {types.RuntimeKind.CLUSTER_TRAINING_RUNTIME}s"
+            ) from e
 
         # Collect runtimes in a map, preferring namespaced over cluster-scoped
         runtimes_by_name = {}
@@ -148,7 +152,10 @@ class KubernetesBackend(RuntimeBackend):
         if cluster_runtimes:
             for runtime in cluster_runtimes.items:
                 if runtime.metadata and runtime.metadata.name:
-                    runtimes_by_name.setdefault(runtime.metadata.name, runtime)
+                    runtimes_by_name.setdefault(
+                        runtime.metadata.name,
+                        runtime,
+                    )
 
         try:
             for runtime in runtimes_by_name.values():
@@ -191,16 +198,16 @@ class KubernetesBackend(RuntimeBackend):
 
         except multiprocessing.TimeoutError as e:
             raise TimeoutError(
-                f"Timeout to get {constants.TRAINING_RUNTIME_KIND}: {self.namespace}/{name}"
+                f"Timeout to get {types.RuntimeKind.TRAINING_RUNTIME}: {self.namespace}/{name}"
             ) from e
         except client.ApiException as e:
             if e.status != 404:
                 raise RuntimeError(
-                    f"Failed to get {constants.TRAINING_RUNTIME_KIND}: {self.namespace}/{name}"
+                    f"Failed to get {types.RuntimeKind.TRAINING_RUNTIME}: {self.namespace}/{name}"
                 ) from e
         except Exception as e:
             raise RuntimeError(
-                f"Failed to get {constants.TRAINING_RUNTIME_KIND}: {self.namespace}/{name}"
+                f"Failed to get {types.RuntimeKind.TRAINING_RUNTIME}: {self.namespace}/{name}"
             ) from e
 
         try:
@@ -217,7 +224,7 @@ class KubernetesBackend(RuntimeBackend):
             return self.__get_runtime_from_cr(runtime)
         except multiprocessing.TimeoutError as e:
             raise TimeoutError(
-                f"Timeout to get {constants.CLUSTER_TRAINING_RUNTIME_KIND}: {name}"
+                f"Timeout to get {types.RuntimeKind.CLUSTER_TRAINING_RUNTIME}: {name}"
             ) from e
         except Exception as e:
             raise RuntimeError(
@@ -608,6 +615,7 @@ class KubernetesBackend(RuntimeBackend):
 
         return types.Runtime(
             name=runtime_cr.metadata.name,
+            kind=types.RuntimeKind(runtime_cr.kind),
             trainer=utils.get_runtime_trainer(
                 runtime_cr.metadata.labels[constants.RUNTIME_FRAMEWORK_LABEL],
                 runtime_cr.spec.template.spec.replicated_jobs,
@@ -817,7 +825,7 @@ class KubernetesBackend(RuntimeBackend):
             ]
 
         trainjob_spec = models.TrainerV1alpha1TrainJobSpec(
-            runtimeRef=models.TrainerV1alpha1RuntimeRef(name=runtime.name),
+            runtimeRef=models.TrainerV1alpha1RuntimeRef(name=runtime.name, kind=runtime.kind.value),
             trainer=trainer_cr if trainer_cr != models.TrainerV1alpha1Trainer() else None,
             runtimePatches=runtime_patch_models,
         )
